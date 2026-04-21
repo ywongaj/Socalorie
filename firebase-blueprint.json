@@ -1,0 +1,93 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Stores user profile information.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "username": { "type": "string" },
+        "profilePicUrl": { "type": "string" },
+        "currentEnergy": { "type": "integer" },
+        "currentSummary": { "type": "string" },
+        "lastUpdated": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "username", "createdAt"]
+    },
+    "EnergyRecord": {
+      "title": "Daily Social Energy",
+      "description": "Stores the user's social energy score and summary for a specific day.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "date": { "type": "string" },
+        "score": { "type": "integer" },
+        "summary": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "date", "score", "updatedAt"]
+    },
+    "Activity": {
+      "title": "Energy Activity",
+      "description": "Records activities that gain or lose social energy.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "date": { "type": "string" },
+        "activityName": { "type": "string" },
+        "energyValue": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "date", "activityName", "energyValue", "createdAt"]
+    },
+    "Friendship": {
+      "title": "Friend Connection",
+      "description": "Tracks friend requests and accepted friendships.",
+      "type": "object",
+      "properties": {
+        "senderUid": { "type": "string" },
+        "receiverUid": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "accepted"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["senderUid", "receiverUid", "status", "createdAt"]
+    },
+    "Notification": {
+      "title": "App Notification",
+      "description": "Notifications for friend invitations and system messages.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "fromUserId": { "type": "string" },
+        "type": { "type": "string", "enum": ["friend_request", "system"] },
+        "message": { "type": "string" },
+        "status": { "type": "string", "enum": ["unread", "read"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "type", "message", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User profiles indexed by UID. Accessible by everyone for search, editable only by owner."
+    },
+    "energyRecords/{recordId}": {
+      "schema": "EnergyRecord",
+      "description": "Daily energy records. recordId is generally userId_YYYY-MM-DD. recordId validation is crucial."
+    },
+    "activities/{activityId}": {
+      "schema": "Activity",
+      "description": "Individual energy activities. Sub-resource of user identity."
+    },
+    "friendships/{friendshipId}": {
+      "schema": "Friendship",
+      "description": "Friendship records. friendshipId is derived from participant UIDs to prevent duplicates."
+    },
+    "notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "User notifications for friend requests and system alerts."
+    }
+  }
+}

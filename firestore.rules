@@ -1,0 +1,89 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Default Deny Catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- PRIMITIVE HELPERS ---
+    function isSignedIn() { return request.auth != null; }
+    function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+
+    // --- ENTITY VALIDATION BLUEPRINTS ---
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['email', 'username', 'createdAt']) &&
+             data.email is string && data.username is string &&
+             data.createdAt == request.time;
+    }
+
+    function isValidEnergyRecord(data) {
+      return data.keys().hasAll(['userId', 'date', 'score', 'updatedAt']) &&
+             data.updatedAt == request.time;
+    }
+
+    function isValidActivity(data) {
+      return data.keys().hasAll(['userId', 'date', 'activityName', 'energyValue', 'createdAt']) &&
+             data.activityName is string &&
+             data.energyValue is int &&
+             data.createdAt == request.time;
+    }
+
+    function isValidFriendship(data) {
+      return data.keys().hasAll(['senderUid', 'receiverUid', 'status', 'createdAt']) &&
+             data.status in ['pending', 'accepted'] &&
+             data.createdAt == request.time;
+    }
+
+    function isValidNotification(data) {
+      return data.keys().hasAll(['userId', 'type', 'message', 'status', 'createdAt']) &&
+             data.type in ['friend_request', 'system'] &&
+             data.status in ['unread', 'read'] &&
+             data.createdAt == request.time;
+    }
+
+    // --- COLLECTION RULES ---
+
+    // 1. Users Collection
+    match /users/{userId} {
+      allow create: if true; // Relaxed for custom identification flow
+      allow update: if true; // Relaxed for custom identification flow
+      allow read, list: if true; 
+    }
+
+    // 2. Energy Records
+    match /energyRecords/{recordId} {
+      allow create: if isValidEnergyRecord(incoming());
+      allow update: if true;
+      allow read, list: if true;
+    }
+
+    // 3. Activities
+    match /activities/{activityId} {
+      allow create: if isValidActivity(incoming());
+      allow delete: if true;
+      allow read, list: if true;
+    }
+
+    // 4. Friendships
+    match /friendships/{friendshipId} {
+      allow create: if isValidFriendship(incoming()) && incoming().status == 'pending';
+      allow update: if true;
+      allow delete: if true;
+      allow read, list: if true;
+    }
+
+    // 5. Notifications
+    match /notifications/{notificationId} {
+      allow create: if isValidNotification(incoming());
+      allow update: if true;
+      allow delete: if true;
+      allow read, list: if true;
+    }
+  }
+}

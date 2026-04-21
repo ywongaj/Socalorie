@@ -1,0 +1,57 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Outfit:wght@400;600;800&display=swap');
+
+@theme {
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  
+  --color-primary: #FF6B6B;
+  --color-secondary: #6366F1;
+  --color-accent: #B066FE;
+  --color-success: #4ADE80;
+  --color-warning: #FB923C;
+  --color-danger: #F87171;
+  --color-page-bg: #FAF9F6;
+  --color-ink: #1A1A1A;
+}
+
+@layer base {
+  body {
+    @apply bg-page-bg text-ink antialiased font-sans;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display text-ink font-black;
+  }
+}
+
+.brutal-card {
+  @apply bg-white border-4 border-black rounded-[32px] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)];
+}
+
+.brutal-btn {
+  @apply bg-white border-4 border-black rounded-2xl font-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all;
+}
+
+.battery-pill {
+  @apply w-[60px] h-[110px] border-4 border-black rounded-2xl relative p-1;
+}
+
+.battery-pill::after {
+  content: '';
+  @apply absolute -top-3 left-1/2 -translate-x-1/2 w-5 h-2 bg-black rounded-t-md;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
